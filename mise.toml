@@ -1,0 +1,10 @@
+[tools]
+# The builder and release workflow run on Lune.
+"github:lune-org/lune" = "latest"
+
+# SVG icons are rasterized with ImageMagick's `magick` or `convert` command.
+"conda:imagemagick" = "latest"
+
+[tasks.build]
+description = "Build the icon pack sidecars"
+run = "lune run build.luau --output packs"
