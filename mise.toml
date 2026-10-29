@@ -5,6 +5,10 @@
 # SVG icons are rasterized with ImageMagick's `magick` or `convert` command.
 "conda:imagemagick" = "latest"
 
+# The builder uses the CLI so every Zstandard frame stores its decompressed size,
+# which EncodingService:GetDecompressedBufferSize requires.
+"conda:zstd" = "latest"
+
 [tasks.build]
 description = "Build the icon pack sidecars"
 run = "lune run build.luau --output packs"

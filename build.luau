@@ -24,7 +24,6 @@
 
 local fs = require("@lune/fs")
 local process = require("@lune/process")
-local serde = require("@lune/serde")
 local task = require("@lune/task")
 
 local MAGIC = "APGPK3"
@@ -288,11 +287,24 @@ local function buildPack(plan)
 		error(`{plan.name}: archive exceeds the maximum Vec payload size`)
 	end
 
-	local compressed = serde.compress("zstd", string.pack("<I4", bitLength) .. payload)
 	fs.writeDir(options.output)
 	local archive = `{options.output}/{plan.name}.zst`
-	fs.writeFile(archive, compressed)
-	return archive, #compressed
+	local raw = `{options.output}/.{plan.name}.raw`
+	fs.writeFile(raw, string.pack("<I4", bitLength) .. payload)
+	local result = process.exec("zstd", {
+		"-q",
+		"-f",
+		"-19",
+		"--content-size",
+		raw,
+		"-o",
+		archive,
+	})
+	fs.removeFile(raw)
+	if not result.ok then
+		error(`{plan.name}: zstd failed: {result.stderr}`)
+	end
+	return archive, #fs.readFile(archive)
 end
 
 local packs = selected
